@@ -10,6 +10,9 @@ python = "^3.10"
 pydantic = {extras = ["email"], version = "^2.8.2"}
 fastapi = "^0.111.1"
 pytest = "^8.2.2"
+pydantic-settings = "^2.3.4"
+sqlalchemy = "^2.0.31"
+alembic = "^1.13.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"
