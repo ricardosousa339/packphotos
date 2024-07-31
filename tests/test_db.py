@@ -11,3 +11,5 @@ def test_create_user(session):
     user = session.scalar(select(User).where(User.username == 'alice'))
 
     assert user.username == 'alice'
+    assert user.password == 'secret'
+    assert user.email == 'teste@test'
