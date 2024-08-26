@@ -33,3 +33,27 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
+
+
+class AlbumSchema(BaseModel):
+    title: str
+
+
+class AlbumPublic(AlbumSchema):
+    id: int
+
+
+class AlbumList(BaseModel):
+    albums: list[AlbumPublic]
+
+
+class PhotoSchema(BaseModel):
+    name: str
+
+
+class PhotoPublic(PhotoSchema):
+    id: int
+
+
+class PhotoList(BaseModel):
+    todos: list[PhotoPublic]
