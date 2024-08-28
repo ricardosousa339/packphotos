@@ -54,6 +54,7 @@ class Photo:
 
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
     name: Mapped[str]
+    url: Mapped[str]
 
     album_id: Mapped[int] = mapped_column(ForeignKey('albums.id'))
     album: Mapped[Album] = relationship(init=False, back_populates='photos')

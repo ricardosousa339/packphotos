@@ -49,11 +49,20 @@ class AlbumList(BaseModel):
 
 class PhotoSchema(BaseModel):
     name: str
+    url: str
 
 
 class PhotoPublic(PhotoSchema):
     id: int
+    album_id: int
 
 
 class PhotoList(BaseModel):
     todos: list[PhotoPublic]
+
+
+class PhotoResponse(BaseModel):
+    id: int
+    album_id: int
+    name: str
+    url: str
