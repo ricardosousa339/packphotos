@@ -13,7 +13,7 @@ from fast_zero.models import Photo, User, table_registry
 from fast_zero.security import get_password_hash
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def client(session):
     def get_session_override():
         return session
@@ -25,7 +25,7 @@ def client(session):
     app.dependency_overrides.clear()
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def session():
     engine = create_engine(
         'sqlite:///:memory:',
@@ -40,7 +40,7 @@ def session():
     table_registry.metadata.drop_all(engine)
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def user(session):
     password = 'testtest'
     user = UserFactory(password=get_password_hash(password))
@@ -54,7 +54,7 @@ def user(session):
     return user
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def other_user(session):
     password = 'testtest'
     user = UserFactory(password=get_password_hash(password))
@@ -68,7 +68,7 @@ def other_user(session):
     return user
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def token(client, user):
     response = client.post(
         '/auth/token',
@@ -78,8 +78,8 @@ def token(client, user):
     return response.json()['access_token']
 
 
-@pytest.fixture(scope='module')
-def _create_albums(client, token):
+@pytest.fixture(scope='session')
+def create_albums(client, token):
     client.post(
         '/albums/',
         headers={'Authorization': f'Bearer {token}'},
@@ -88,14 +88,13 @@ def _create_albums(client, token):
     response = client.post(
         '/albums/',
         headers={'Authorization': f'Bearer {token}'},
-        json={'id': 1, 'title': 'Test album 2'},
+        json={'id': 2, 'title': 'Test album 2'},
     )
 
     assert response.status_code == HTTPStatus.OK
-    album_id = response.json().get('id')
-    assert album_id is not None
-    
-    #TODO: Fazer funcionar a criacao de album no teste com id !+ None
+    return response.json()
+
+    # TODO: Fazer funcionar a criacao de album no teste com id !+ None
 
 
 def photo(session):

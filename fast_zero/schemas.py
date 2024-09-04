@@ -58,7 +58,7 @@ class PhotoPublic(PhotoSchema):
 
 
 class PhotoList(BaseModel):
-    todos: list[PhotoPublic]
+    photos: list[PhotoPublic]
 
 
 class PhotoResponse(BaseModel):
