@@ -1,6 +1,6 @@
 from jwt import decode
 
-from fast_api.fast_zero.security import create_access_token, settings
+from fast_zero.security import create_access_token, settings
 
 
 def test_jwt():

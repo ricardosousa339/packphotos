@@ -16,8 +16,12 @@ alembic = "^1.13.2"
 pyjwt = "^2.8.0"
 pwdlib = {extras = ["argon2"], version = "^0.2.0"}
 python-multipart = "^0.0.9"
+<<<<<<< HEAD
 psycopg = "^3.0"
 alembic
+=======
+protobuf = "^5.27.3"
+>>>>>>> origin/firestore-integration
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"
