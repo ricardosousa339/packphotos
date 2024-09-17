@@ -36,7 +36,7 @@ def session():
 
     with Session(engine) as session:
         yield session
-
+    session.close()
     table_registry.metadata.drop_all(engine)
 
 
@@ -73,6 +73,19 @@ def token(client, user):
     response = client.post(
         '/auth/token',
         data={'username': user.email, 'password': user.clean_password},
+    )
+    print(response)
+    return response.json()['access_token']
+
+
+@pytest.fixture(scope='session')
+def other_token(client, other_user):
+    response = client.post(
+        '/auth/token',
+        data={
+            'username': other_user.email,
+            'password': other_user.clean_password,
+        },
     )
     print(response)
     return response.json()['access_token']

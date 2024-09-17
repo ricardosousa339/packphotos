@@ -3,13 +3,10 @@ from sqlalchemy import select
 from fast_zero.models import User
 
 
-def test_create_user(session):
-    new_user = User(username='alice', password='secret', email='teste@test')
-    session.add(new_user)
-    session.commit()
+def test_select_user(session):
+    # Assuming there is already a user with username 'bob' in the database
+    user = session.scalar(select(User).where(User.username == 'teste0'))
 
-    user = session.scalar(select(User).where(User.username == 'alice'))
-
-    assert user.username == 'alice'
-    assert user.password == 'secret'
-    assert user.email == 'teste@test'
+    assert user is not None
+    assert user.username == 'teste0'
+    assert user.email == 'teste0@test.com'

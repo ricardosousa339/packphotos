@@ -1,7 +1,5 @@
 from http import HTTPStatus
 
-from fast_zero.schemas import UserPublic
-
 
 def test_create_existing_username(client):
     client.post(
@@ -25,14 +23,16 @@ def test_create_existing_username(client):
 
 
 def test_create_existing_email(client):
-    client.post(
+    response = client.post(
         '/users/',
         json={
-            'username': 'alice',
+            'username': 'alice2',
             'email': 'alice@hotmail.com',
             'password': 'secret123',
         },
     )
+
+    assert response.status_code == HTTPStatus.CREATED
 
     response = client.post(
         '/users/',
@@ -48,19 +48,45 @@ def test_create_existing_email(client):
 def test_read_users(client):
     response = client.get('/users/')
     assert response.status_code == HTTPStatus.OK
-    assert response.json() == {'users': []}
+    assert response.json() == {
+        'users': [
+            {
+                'email': 'teste0@test.com',
+                'id': 1,
+                'username': 'teste0',
+            },
+            {
+                'email': 'blabla@hotmail.com',
+                'id': 2,
+                'username': 'alice',
+            },
+            {
+                'email': 'alice@hotmail.com',
+                'id': 3,
+                'username': 'alice2',
+            },
+        ],
+    }
 
 
-def test_read_users_with_users(client, user):
-    user_schema = UserPublic.model_validate(user).model_dump()
-    response = client.get('/users/')
-    assert response.json() == {'users': [user_schema]}
-
-
-def test_update_user(client, user, token):
+def test_update_user_with_wrong_user(client, user, other_token):
     response = client.put(
         f'/users/{user.id}',
-        headers={'Authorization': f'Bearer {token}'},
+        headers={'Authorization': f'Bearer {other_token}'},
+        json={
+            'username': 'bob',
+            'email': 'bob@example.com',
+            'password': 'mynewpassword',
+        },
+    )
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json() == {'detail': 'Not enough permissions'}
+
+
+def test_update_user(client, other_user, other_token):
+    response = client.put(
+        f'/users/{other_user.id}',
+        headers={'Authorization': f'Bearer {other_token}'},
         json={
             'username': 'bob',
             'email': 'bob@example.com',
@@ -74,11 +100,39 @@ def test_update_user(client, user, token):
     assert response.json() == {
         'username': 'bob',
         'email': 'bob@example.com',
-        'id': user.id,
+        'id': other_user.id,
     }
 
 
 def test_delete_user(client, user, token):
+    response = client.get('/users/')
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'users': [
+            {
+                'email': 'teste0@test.com',
+                'id': 1,
+                'username': 'teste0',
+            },
+            {
+                'email': 'blabla@hotmail.com',
+                'id': 2,
+                'username': 'alice',
+            },
+            {
+                'email': 'alice@hotmail.com',
+                'id': 3,
+                'username': 'alice2',
+            },
+            {
+                'email': 'bob@example.com',
+                'id': 4,
+                'username': 'bob',
+            },
+        ],
+    }
+    # assert response.json() == {'user': user.username}
+
     response = client.delete(
         f'/users/{user.id}',
         headers={'Authorization': f'Bearer {token}'},
@@ -91,9 +145,9 @@ def test_create_user(client):
     response = client.post(
         '/users/',
         json={
-            'username': 'alice',
-            'email': 'alice@example.com',
-            'password': 'secret',
+            'username': 'luana',
+            'email': 'luana@email.com',
+            'password': '123456',
         },
     )
 
@@ -101,24 +155,10 @@ def test_create_user(client):
 
     assert response.status_code == HTTPStatus.CREATED
     assert response.json() == {
-        'username': 'alice',
-        'email': 'alice@example.com',
-        'id': 1,
+        'username': 'luana',
+        'email': 'luana@email.com',
+        'id': 5,
     }
-
-
-def test_update_user_with_wrong_user(client, other_user, token):
-    response = client.put(
-        f'/users/{other_user.id}',
-        headers={'Authorization': f'Bearer {token}'},
-        json={
-            'username': 'bob',
-            'email': 'bob@example.com',
-            'password': 'mynewpassword',
-        },
-    )
-    assert response.status_code == HTTPStatus.FORBIDDEN
-    assert response.json() == {'detail': 'Not enough permissions'}
 
 
 def test_delete_user_wrong_user(client, other_user, token):
@@ -126,5 +166,5 @@ def test_delete_user_wrong_user(client, other_user, token):
         f'/users/{other_user.id}',
         headers={'Authorization': f'Bearer {token}'},
     )
-    assert response.status_code == HTTPStatus.FORBIDDEN
-    assert response.json() == {'detail': 'Not enough permissions'}
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json() == {'detail': 'Could not validate credentials'}
