@@ -4,6 +4,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 
@@ -50,8 +51,12 @@ def create_album(
 
 
 @router.get('/', response_model=AlbumList)
-def read_albums(session: Session, skip: int = 0, limit: int = 100):
-    albums = session.scalars(select(Album).offset(skip).limit(limit)).all()
+def read_albums(session: Session, 
+                 user: CurrentUser, 
+                 skip: int = 0, 
+                 limit: int = 100):
+    
+    albums = session.scalars(select(Album).where(Album.user_id == user.id).offset(skip).limit(limit)).all()
     return {'albums': albums}
 
 
@@ -140,8 +145,14 @@ def delete_album(
 
 
 @router.get('/{album_id}', response_model=AlbumPublic)
-def read_album(album_id: int, session: Session):
-    db_album = session.scalar(select(Album).where(Album.id == album_id))
+def read_album(album_id: int, 
+               session: Session,
+               user: CurrentUser):
+    db_album = session.scalar(select(Album).where(
+        and_(
+            Album.id == album_id, 
+            Album.user_id == user.id
+            )))
 
     if not db_album:
         raise HTTPException(
@@ -153,8 +164,15 @@ def read_album(album_id: int, session: Session):
 
 
 @router.get('/{album_id}/photos', response_model=PhotoList)
-def read_photos_from_album(album_id: int, session: Session):
-    db_album = session.scalar(select(Album).where(Album.id == album_id))
+def read_photos_from_album(album_id: int, 
+                           session: Session,
+                           user: CurrentUser):
+    db_album = session.scalar(select(Album).where(
+        and_(
+            Album.id == album_id,
+            Album.user_id == user.id
+        )
+    ))
 
     if not db_album:
         raise HTTPException(
@@ -174,7 +192,12 @@ def delete_photo_from_album(
     current_user: CurrentUser,
     session: Session,
 ):
-    db_album = session.scalar(select(Album).where(Album.id == album_id))
+    db_album = session.scalar(select(Album).where(
+        and_(
+            Album.id == album_id,
+            Album.user_id == current_user.id
+        )
+    ))
 
     if not db_album:
         raise HTTPException(
