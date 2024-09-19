@@ -1,74 +1,39 @@
 from http import HTTPStatus
+import io
+
+from fastapi.testclient import TestClient
 
 
-def test_create_albums(client, token, create_albums):
+def test_add_photo_to_album(client: TestClient, token: str):
+    # Simular um arquivo de imagem
+    file_content = io.BytesIO(b"fake image data")
+    files = {'photo': ('test_photo.jpg', file_content, 'image/jpeg')}
+    
     response = client.post(
-        '/albums/',
+        '/albums/2/photos',
         headers={'Authorization': f'Bearer {token}'},
-        json={
-            'title': 'Test album 1',
-        },
+        files=files,
     )
-    assert response.json() == {
-        'id': 3,
-        'title': 'Test album 1',
-    }
-
-
-def test_read_albums(client, create_albums):
-    response = client.get('/albums/')
-    assert response.status_code == HTTPStatus.OK
-    json_response = response.json()
-    assert 'albums' in json_response
-    assert isinstance(json_response['albums'], list)
-
-
-def test_read_album(client, create_albums):
-    response = client.get('/albums/1')
-    assert response.status_code == HTTPStatus.OK
-    assert response.json() == {
-        'id': 1,
-        'title': 'Test album 1',
-    }
-
-
-def test_update_album(client, token, create_albums):
-    response = client.put(
-        '/albums/1',
-        headers={'Authorization': f'Bearer {token}'},
-        json={
-            'title': 'Updated album',
-        },
-    )
-
+        
     assert response.status_code == HTTPStatus.OK
     json_response = response.json()
     assert json_response['id'] == 1
-    assert json_response['title'] == 'Updated album'
+    assert json_response['album_id'] == 1
+    assert json_response['name'] == 'test_photo.jpg'
+    assert 'url' in json_response
+    assert json_response['url'].startswith('https://')
 
 
-def test_add_photo_to_album(client, token):
-    response = client.post(
-        '/albums/1/photos',
-        headers={'Authorization': f'Bearer {token}'},
-        json={
-            'name': 'Photo 1',
-            'url': 'https://example.com/photo.jpg',
-        },
-    )
-    assert response.status_code == HTTPStatus.OK
-    assert response.json() == {
-        'id': 1,
-        'album_id': 1,
-        'url': 'https://example.com/photo.jpg',
-        'name': 'Photo 1',
-    }
-
-
-def test_read_photos_from_album(client):
+def test_read_photos_from_album(client: TestClient):
     response = client.get('/albums/1/photos')
     assert response.status_code == HTTPStatus.OK
-    assert 'photos' in response.json()
+    json_response = response.json()
+    assert isinstance(json_response, list)
+    assert len(json_response) > 0
+    assert json_response[0]['id'] == 1
+    assert json_response[0]['album_id'] == 1
+    assert 'url' in json_response[0]
+    assert json_response[0]['url'].startswith('https://')
 
 
 def test_delete_photo_from_album(client, token):

@@ -2,7 +2,7 @@ import logging
 from http import HTTPStatus
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, File, UploadFile
 from fastapi.exceptions import HTTPException
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
@@ -19,6 +19,7 @@ from fast_zero.schemas import (
     PhotoSchema,
 )
 from fast_zero.security import get_current_user
+from fast_zero.storage import delete_file, upload_file
 
 # db = firestore.Client()
 logger = logging.getLogger(__name__)
@@ -91,9 +92,9 @@ def update_album(
 @router.post('/{album_id}/photos', response_model=PhotoPublic)
 def add_photo_to_album(
     album_id: int,
-    photo: PhotoSchema,
-    session: Session,
+    session: Session, # type: ignore
     current_user: CurrentUser,
+    photo: UploadFile = File(...),
 ):
     # logger.info(f"Received request to add photo to album
     # {album_id} with data: {photo}")
@@ -111,8 +112,19 @@ def add_photo_to_album(
             status_code=HTTPStatus.FORBIDDEN,
             detail='Not enough permissions',
         )
+    
+    file_location = f'{photo.filename}'
+    with open(file_location, 'wb') as file_object:
+        file_object.write(photo.file.read())
 
-    db_photo = Photo(url=photo.url, name=photo.name, album_id=album_id)
+    try:
+        public_url = upload_file(file_location, photo.filename)
+    except Exception as e:
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
+    
+    
+
+    db_photo = Photo(url=public_url, name=photo.filename, album_id=album_id)
     session.add(db_photo)
     session.commit()
     session.refresh(db_photo)
@@ -218,6 +230,14 @@ def delete_photo_from_album(
             status_code=HTTPStatus.NOT_FOUND,
             detail='Photo not found',
         )
+    
+    try:
+        delete_file(db_photo.url)
+    except Exception as e:
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=str(e),
+        )        
 
     session.delete(db_photo)
     session.commit()
