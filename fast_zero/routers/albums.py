@@ -39,6 +39,7 @@ def create_album(
     db_album = Album(
         title=album.title,
         user_id=user.id,
+        price_per_photo=album.price_per_photo,
     )
 
     print(db_album)
@@ -95,6 +96,7 @@ def add_photo_to_album(
     session: Session, # type: ignore
     current_user: CurrentUser,
     photo: UploadFile = File(...),
+    price: float = None,
 ):
     # logger.info(f"Received request to add photo to album
     # {album_id} with data: {photo}")
@@ -113,6 +115,9 @@ def add_photo_to_album(
             detail='Not enough permissions',
         )
     
+    if price is None:
+        price = db_album.price_per_photo
+    
     file_location = f'{photo.filename}'
     with open(file_location, 'wb') as file_object:
         file_object.write(photo.file.read())
@@ -124,7 +129,13 @@ def add_photo_to_album(
     
     
 
-    db_photo = Photo(url=public_url, name=photo.filename, album_id=album_id)
+    db_photo = Photo(
+        url=public_url, 
+        name=photo.filename, 
+        album_id=album_id, 
+        price=price,
+        purchases=[]
+        )
     session.add(db_photo)
     session.commit()
     session.refresh(db_photo)

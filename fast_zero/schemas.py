@@ -1,3 +1,5 @@
+from datetime import datetime
+from typing import List
 from pydantic import BaseModel, ConfigDict, EmailStr
 
 
@@ -36,6 +38,7 @@ class TokenData(BaseModel):
 
 
 class AlbumSchema(BaseModel):
+    price_per_photo: float
     title: str
 
 
@@ -67,3 +70,16 @@ class PhotoResponse(BaseModel):
     album_id: int
     name: str
     url: str
+
+
+class PurchaseCreate(BaseModel):
+    photo_ids: List[int]
+    amount: float
+
+class PurchasePublic(BaseModel):
+    id: int
+    user_id: int
+    amount: float
+    status: str
+    created_at: datetime
+    photos: List[PhotoPublic]
