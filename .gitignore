@@ -1,3 +1,4 @@
 database.db
 __pycache__/
 fast_zero/__pycache__/*
+firebase-credentials.json
