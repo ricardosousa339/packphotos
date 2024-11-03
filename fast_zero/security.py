@@ -58,18 +58,25 @@ def get_current_user(
         print('payload')
         username: str = payload.get('sub')
         if not username:
+            print('Erro 1')
             raise credentials_exception
         token_data = TokenData(username=username)
     except DecodeError:
+        print('Erro 2')
         raise credentials_exception
     except ExpiredSignatureError:
+        print('Erro 3')
         raise credentials_exception
 
     user = session.scalar(
         select(User).where(User.email == token_data.username)
     )
 
+    print(f'User: {user}')
+    print(f'Token data: {token_data.username}')
+
     if not user:
+        print('Erro 4')
         raise credentials_exception
 
     return user

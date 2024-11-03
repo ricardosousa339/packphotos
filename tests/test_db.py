@@ -4,7 +4,9 @@ from fast_zero.models import User
 
 
 def test_create_user(session):
-    new_user = User(username='alice', password='secret', email='teste@test')
+    new_user = User(
+        username='alice', password='secret', email='teste@test.com'
+    )
     session.add(new_user)
     session.commit()
 
@@ -12,4 +14,4 @@ def test_create_user(session):
 
     assert user.username == 'alice'
     assert user.password == 'secret'
-    assert user.email == 'teste@test'
+    assert user.email == 'teste@test.com'

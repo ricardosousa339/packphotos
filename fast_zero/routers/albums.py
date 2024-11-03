@@ -39,19 +39,23 @@ def create_album(
         user_id=user.id,
     )
 
-    print(db_album)
-    print('-----\n\n\n\n\n\n\n\n\n\n\\n-------testeteste')
     session.add(db_album)
     session.commit()
     session.refresh(db_album)
-    print(db_album)
 
     return db_album
 
 
 @router.get('/', response_model=AlbumList)
-def read_albums(session: Session, skip: int = 0, limit: int = 100):
-    albums = session.scalars(select(Album).offset(skip).limit(limit)).all()
+def read_albums(session: Session,
+                current_user: CurrentUser,
+                skip: int = 0,
+                limit: int = 100):
+
+    print(f"Current user: {current_user}")
+    albums = session.scalars(select(Album)
+                             .where(Album.user_id == current_user.id)
+                             .offset(skip).limit(limit)).all()
     return {'albums': albums}
 
 

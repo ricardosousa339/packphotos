@@ -79,6 +79,18 @@ def token(client, user):
 
 
 @pytest.fixture(scope='session')
+def other_token(client, other_user):
+    response = client.post(
+        '/auth/token',
+        data={
+            'username': other_user.email,
+            'password': other_user.clean_password,
+        },
+    )
+    return response.json()['access_token']
+
+
+@pytest.fixture(scope='session')
 def create_albums(client, token):
     client.post(
         '/albums/',

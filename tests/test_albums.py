@@ -15,8 +15,10 @@ def test_create_albums(client, token, create_albums):
     }
 
 
-def test_read_albums(client, create_albums):
-    response = client.get('/albums/')
+def test_read_albums(client, token, create_albums):
+    response = client.get('/albums/',
+                          headers={'Authorization': f'Bearer {token}'}
+                          )
     assert response.status_code == HTTPStatus.OK
     json_response = response.json()
     assert 'albums' in json_response
@@ -102,7 +104,9 @@ def test_create_album(client, token):
     }
 
 
-def test_read_albums_pagination(client):
-    response = client.get('/albums/?skip=0&limit=100')
+def test_read_albums_pagination(client, token):
+    response = client.get('/albums/?skip=0&limit=100',
+                          headers={'Authorization': f'Bearer {token}'}
+                          )
     assert response.status_code == HTTPStatus.OK
     assert 'albums' in response.json()
