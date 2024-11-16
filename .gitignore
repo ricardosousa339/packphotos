@@ -4,3 +4,5 @@ fast_zero/__pycache__/models.cpython-312.pyc
 fast_zero/__pycache__/app.cpython-312.pyc
 fast_zero/__pycache__/security.cpython-312.pyc
 fast_zero/__pycache__/schemas.cpython-312.pyc
+__pycache__/
+fast_zero/__pycache__/*

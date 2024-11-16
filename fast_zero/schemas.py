@@ -41,6 +41,7 @@ class AlbumSchema(BaseModel):
 
 class AlbumPublic(AlbumSchema):
     id: int
+    user_id: int
 
 
 class AlbumList(BaseModel):
