@@ -1,5 +1,7 @@
 from http import HTTPStatus
 
+from fast_zero.schemas import UserPublic
+
 
 def test_create_existing_username(client):
     client.post(
@@ -23,7 +25,6 @@ def test_create_existing_username(client):
 
 
 def test_create_existing_email(client):
-    response = client.post(
     response = client.post(
         '/users/',
         json={

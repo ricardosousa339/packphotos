@@ -48,15 +48,19 @@ def create_album(
 
 
 @router.get('/', response_model=AlbumList)
-def read_albums(session: Session,
-                current_user: CurrentUser,
-                skip: int = 0,
-                limit: int = 100):
-
-    print(f"Current user: {current_user}")
-    albums = session.scalars(select(Album)
-                             .where(Album.user_id == current_user.id)
-                             .offset(skip).limit(limit)).all()
+def read_albums(
+    session: Session,
+    current_user: CurrentUser,
+    skip: int = 0,
+    limit: int = 100,
+):
+    print(f'Current user: {current_user}')
+    albums = session.scalars(
+        select(Album)
+        .where(Album.user_id == current_user.id)
+        .offset(skip)
+        .limit(limit)
+    ).all()
     return {'albums': albums}
 
 
@@ -145,14 +149,12 @@ def delete_album(
 
 
 @router.get('/{album_id}', response_model=AlbumPublic)
-def read_album(album_id: int, 
-               session: Session,
-               user: CurrentUser):
-    db_album = session.scalar(select(Album).where(
-        and_(
-            Album.id == album_id, 
-            Album.user_id == user.id
-            )))
+def read_album(album_id: int, session: Session, user: CurrentUser):
+    db_album = session.scalar(
+        select(Album).where(
+            and_(Album.id == album_id, Album.user_id == user.id)
+        )
+    )
 
     if not db_album:
         raise HTTPException(
@@ -164,15 +166,12 @@ def read_album(album_id: int,
 
 
 @router.get('/{album_id}/photos', response_model=PhotoList)
-def read_photos_from_album(album_id: int, 
-                           session: Session,
-                           user: CurrentUser):
-    db_album = session.scalar(select(Album).where(
-        and_(
-            Album.id == album_id,
-            Album.user_id == user.id
+def read_photos_from_album(album_id: int, session: Session, user: CurrentUser):
+    db_album = session.scalar(
+        select(Album).where(
+            and_(Album.id == album_id, Album.user_id == user.id)
         )
-    ))
+    )
 
     if not db_album:
         raise HTTPException(
@@ -192,12 +191,11 @@ def delete_photo_from_album(
     current_user: CurrentUser,
     session: Session,
 ):
-    db_album = session.scalar(select(Album).where(
-        and_(
-            Album.id == album_id,
-            Album.user_id == current_user.id
+    db_album = session.scalar(
+        select(Album).where(
+            and_(Album.id == album_id, Album.user_id == current_user.id)
         )
-    ))
+    )
 
     if not db_album:
         raise HTTPException(
